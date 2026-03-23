@@ -18,7 +18,7 @@ app = typer.Typer(
 @app.callback(invoke_without_command=True)
 def cli(
     ctx: typer.Context,
-    input_file: Optional[Path] = typer.Option(
+    input_file: Path = typer.Option(
         IN_FILE, "--file", exists=True, file_okay=True, dir_okay=False, readable=True, help="Load input excel file."
     ),
     json_file: Optional[Path] = typer.Option(
