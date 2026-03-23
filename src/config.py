@@ -26,6 +26,6 @@ ROOT_KEY = "3007"
 ROOT_NAME = "Merian Gold Mines"
 
 # config related to Logging
-LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG").upper()
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 LOG_TO_FILE = _as_bool(os.getenv("LOG_TO_FILE", "true"))
 LOG_TO_CONSOL = _as_bool(os.getenv("LOG_TO_CONSOLE", "true"))
