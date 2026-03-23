@@ -65,9 +65,7 @@ def _resolve_output_path(custom_path: Optional[Path], input_path: Path) -> Path:
 
 
 def run(json_file: Optional[Path], in_file: Path, out_file: Optional[Path], all_output: bool):
-    logger.debug(
-        f"Starting run with input='{in_file}', json='{json_file}', output='{out_file}', mark_all={all_output}."
-    )
+    logger.debug(f"Starting run with input='{in_file}', json='{json_file}', output='{out_file}', mark_all={all_output}.")
     excel_manager = ExcelManager(in_file)
     hierarchy_dict = excel_manager.create_dict()
 
