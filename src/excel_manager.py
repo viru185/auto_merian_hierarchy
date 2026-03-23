@@ -45,7 +45,7 @@ class ExcelManager:
                 raise ValueError(f"Missing required columns in sheet '{sheet_name}': {', '.join(missing)}.")
 
             df = raw_df.loc[:, self.REQUIRED_COLUMNS].copy()
-            df = df.dropna(subset=self.REQUIRED_COLUMNS, how="any")
+            df = df.dropna(subset=self.REQUIRED_COLUMNS, how="any") # type: ignore
 
             for col in self.REQUIRED_COLUMNS:
                 df[col] = df[col].astype(str).str.strip()
