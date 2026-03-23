@@ -8,8 +8,7 @@ load_dotenv()
 
 # Load env config
 IN_FILE = Path(os.getenv("DATA_IN", r"data/Merian-Kept-Hierarchy-Combined.xlsx"))
-_outfile_calc = IN_FILE.stem + "_PI_Builder" + IN_FILE.suffix
-OUT_FILE = Path(os.getenv("DATA_OUT", _outfile_calc))
+OUT_FILE = Path(IN_FILE).with_name(f"{Path(IN_FILE).stem}_PI_Builder{Path(IN_FILE).suffix}")
 JSON_FILE = Path(os.getenv("JSON_FILE", r"data/merian_hierarchy.json"))
 
 # Constants path used in the app
