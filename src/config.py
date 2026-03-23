@@ -16,6 +16,10 @@ JSON_FILE = Path(os.getenv("JSON_FILE", r"data/merian_hierarchy.json"))
 LOGS_FILE = Path("logs/app.log")
 LOGS_DIR = Path("logs")
 
+# Hierarchy root definition
+ROOT_KEY = "3007"
+ROOT_NAME = "Merian Gold Mines"
+
 # config related to Logging
 LOG_LEVEL = "DEBUG"
 LOG_TO_FILE = True
