@@ -35,4 +35,4 @@ def init_loguru() -> None:
 
 init_loguru()
 
-logger.info("Logger initialized successfully.")
+logger.info(f"Logger initialized successfully.")
