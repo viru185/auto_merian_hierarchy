@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 from typing import Optional
@@ -64,8 +65,55 @@ def _resolve_output_path(custom_path: Optional[Path], input_path: Path) -> Path:
     return target
 
 
+def _exit_with_io_error(message: str) -> None:
+    typer.secho(message, fg="red", err=True)
+    raise typer.Exit(code=1)
+
+
+def _ensure_file_readable(path: Path, label: str) -> None:
+    resolved = Path(path)
+    if not resolved.exists() or not resolved.is_file():
+        _exit_with_io_error(f"{label} '{resolved}' does not exist or is not a file.")
+    try:
+        with resolved.open("rb"):
+            pass
+    except OSError as exc:
+        _exit_with_io_error(f"{label} '{resolved}' cannot be opened for reading: {exc}")
+
+
+def _ensure_file_writable(path: Path, label: str) -> None:
+    if not os.access(path, os.W_OK):
+        _exit_with_io_error(f"{label} '{path}' is not writable.")
+
+
+def _ensure_parent_writable(path: Path, label: str) -> None:
+    parent = path if path.is_dir() else path.parent
+    if not parent.exists():
+        _exit_with_io_error(f"{label} parent directory '{parent}' does not exist. Create it before running the tool.")
+    if not os.access(parent, os.W_OK):
+        _exit_with_io_error(f"{label} parent directory '{parent}' is not writable.")
+
+
+def _preflight_io_checks(input_path: Path, json_path: Optional[Path], output_path: Path) -> None:
+    _ensure_file_readable(input_path, "Input Excel file")
+
+    if json_path:
+        if json_path.exists():
+            _ensure_file_readable(json_path, "Hierarchy JSON file")
+            _ensure_file_writable(json_path, "Hierarchy JSON file")
+        else:
+            _ensure_parent_writable(json_path, "Hierarchy JSON file")
+
+    _ensure_parent_writable(output_path, "PI Builder output file")
+    if output_path.exists():
+        _ensure_file_writable(output_path, "PI Builder output file")
+
+
 def run(json_file: Optional[Path], in_file: Path, out_file: Optional[Path], all_output: bool):
     logger.debug(f"Starting run with input='{in_file}', json='{json_file}', output='{out_file}', mark_all={all_output}.")
+    output_path = _resolve_output_path(out_file, in_file)
+    _preflight_io_checks(in_file, json_file, output_path)
+
     excel_manager = ExcelManager(in_file)
     hierarchy_dict = excel_manager.create_dict()
 
@@ -92,7 +140,6 @@ def run(json_file: Optional[Path], in_file: Path, out_file: Optional[Path], all_
         typer.echo(message)
         return
 
-    output_path = _resolve_output_path(out_file, in_file)
     logger.debug(f"Resolved PI Builder output path: '{output_path}'.")
     df = build_pibuilder_dataframe(hierarchy_dict, diff, mark_all=all_output)
     export_to_excel(df, output_path)
