@@ -1,7 +1,6 @@
 import os
 import sys
 from pathlib import Path
-from typing import Optional
 
 import typer
 
@@ -22,7 +21,7 @@ def cli(
     input_file: Path = typer.Option(
         IN_FILE, "--file", exists=True, file_okay=True, dir_okay=False, readable=True, help="Load input excel file."
     ),
-    json_file: Optional[Path] = typer.Option(
+    json_file: Path = typer.Option(
         JSON_FILE,
         "--json",
         exists=False,
@@ -32,7 +31,7 @@ def cli(
         help="will load the json file for the comparison or will choose defalut.",
     ),
     all_output: bool = typer.Option(False, "--all", help="give the whole pi builder excel file with all marked as X."),
-    output: Optional[Path] = typer.Option(None, "--output", help="output location. file name is optional."),
+    output: Path = typer.Option(None, "--output", help="output location. file name is optional."),
     debug: bool = typer.Option(False, "--debug", help="Enable verbose debug logging to stderr."),
 ):
     if debug:
@@ -42,7 +41,7 @@ def cli(
     run(json_file=json_file, in_file=input_file, out_file=output, all_output=all_output)
 
 
-def _resolve_output_path(custom_path: Optional[Path], input_path: Path) -> Path:
+def _resolve_output_path(custom_path: Path, input_path: Path) -> Path:
     config_path = Path(OUT_FILE)
     derived_suffix = config_path.suffix or input_path.suffix or ".xlsx"
     derived_name = config_path.name or f"{input_path.stem}_PI_Builder{derived_suffix}"
@@ -94,7 +93,7 @@ def _ensure_parent_writable(path: Path, label: str) -> None:
         _exit_with_io_error(f"{label} parent directory '{parent}' is not writable.")
 
 
-def _preflight_io_checks(input_path: Path, json_path: Optional[Path], output_path: Path) -> None:
+def _preflight_io_checks(input_path: Path, json_path: Path, output_path: Path) -> None:
     _ensure_file_readable(input_path, "Input Excel file")
 
     if json_path:
@@ -109,7 +108,7 @@ def _preflight_io_checks(input_path: Path, json_path: Optional[Path], output_pat
         _ensure_file_writable(output_path, "PI Builder output file")
 
 
-def run(json_file: Optional[Path], in_file: Path, out_file: Optional[Path], all_output: bool):
+def run(json_file: Path, in_file: Path, out_file: Path, all_output: bool):
     logger.debug(f"Starting run with input='{in_file}', json='{json_file}', output='{out_file}', mark_all={all_output}.")
     output_path = _resolve_output_path(out_file, in_file)
     _preflight_io_checks(in_file, json_file, output_path)
