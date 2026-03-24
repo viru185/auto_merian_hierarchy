@@ -8,6 +8,11 @@
 - **Default behaviour:** Uses the settings from `.env` when present (otherwise the built-in defaults under `data/`), writes logs to `./logs/app.log`, and stops immediately if it can’t read/write any required file.
 
 ## Setup and Usage
+0. **Get the code:**
+   ```powershell
+   git clone https://github.com/viru185/auto_merian_hierarchy.git
+   cd auto_merian_hierarchy
+   ```
 1. **Install uv** (Python package/dependency manager):
    ```powershell
    pip install uv
