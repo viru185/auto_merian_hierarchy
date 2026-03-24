@@ -35,6 +35,7 @@
 | `DATA_IN` | Source Excel file containing `Functional Loc.` and `Standardized Description`. |
 | `DATA_OUT` | Target PI Builder workbook path (defaults beside the input file). |
 | `JSON_FILE` | JSON file storing the last synced hierarchy for delta detection. |
+| `FUNCTIONAL_LOC_COLUMN` / `DESCRIPTION_COLUMN` | Override the Excel headers for the hierarchy key/description columns if the source workbook changes (defaults to `Functional Loc.` / `Standardized Description`). |
 | `LOGS_DIR` / `LOGS_FILE` | Where log files live (defaults to `logs/app.log`). |
 | `LOG_LEVEL` | Logging verbosity (`DEBUG`, `INFO`, etc.). |
 | `LOG_TO_FILE` / `LOG_TO_CONSOLE` | Enable/disable file or console logging (`true`/`false`). |
