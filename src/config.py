@@ -21,6 +21,10 @@ JSON_FILE = Path(os.getenv("JSON_FILE", r"data/merian_hierarchy.json"))
 LOGS_DIR = Path(os.getenv("LOGS_DIR", "logs"))
 LOGS_FILE = Path(os.getenv("LOGS_FILE", str(LOGS_DIR / "app.log")))
 
+# Column names inside the hierarchy workbook (override when the source changes headers)
+FUNCTIONAL_LOC_COLUMN = os.getenv("FUNCTIONAL_LOC_COLUMN", "Functional Loc.").strip()
+DESCRIPTION_COLUMN = os.getenv("DESCRIPTION_COLUMN", "Standardized Description").strip()
+
 # Hierarchy root definition
 ROOT_KEY = "3007"
 ROOT_NAME = "Merian Gold Mines"
