@@ -3,17 +3,26 @@ from typing import Optional
 
 import pandas as pd
 
-from src.config import ROOT_KEY, ROOT_NAME
+from src.config import DESCRIPTION_COLUMN, FUNCTIONAL_LOC_COLUMN, ROOT_KEY, ROOT_NAME
 from src.logger import logger
 
 
 class ExcelManager:
-    REQUIRED_COLUMNS = ("Functional Loc.", "Standardized Description")
-
-    def __init__(self, excel_path: Optional[Path] = None) -> None:
+    def __init__(
+        self,
+        excel_path: Optional[Path] = None,
+        functional_column: str = FUNCTIONAL_LOC_COLUMN,
+        description_column: str = DESCRIPTION_COLUMN,
+    ) -> None:
         self.excel_path = Path(excel_path) if excel_path else None
         self._dataframe: Optional[pd.DataFrame] = None
-        logger.debug(f"ExcelManager initialized for path '{self.excel_path}'.")
+        self.functional_column = functional_column
+        self.description_column = description_column
+        self._required_columns = (self.functional_column, self.description_column)
+        logger.debug(
+            f"ExcelManager initialized for path '{self.excel_path}' "
+            f"(functional column='{self.functional_column}', description column='{self.description_column}')."
+        )
 
     def _read_excel_file(self, path, sheet_name=None):
         return pd.read_excel(path, sheet_name=sheet_name, dtype=str)
@@ -40,18 +49,18 @@ class ExcelManager:
         for sheet_name, raw_df in workbook.items():
             logger.info(f"Processing sheet: {sheet_name}")
 
-            missing = [col for col in self.REQUIRED_COLUMNS if col not in raw_df.columns]
+            missing = [col for col in self._required_columns if col not in raw_df.columns]
             if missing:
                 raise ValueError(f"Missing required columns in sheet '{sheet_name}': {', '.join(missing)}.")
 
-            df = raw_df.loc[:, self.REQUIRED_COLUMNS].copy()
-            df = df.dropna(subset=self.REQUIRED_COLUMNS, how="any") # type: ignore
+            df = raw_df.loc[:, self._required_columns].copy()
+            df = df.dropna(subset=self._required_columns, how="any") # type: ignore
 
-            for col in self.REQUIRED_COLUMNS:
+            for col in self._required_columns:
                 df[col] = df[col].astype(str).str.strip()
 
-            df["Functional Loc."] = df["Functional Loc."].str.replace(r"\.0+$", "", regex=True)
-            df = df[(df["Functional Loc."] != "") & (df["Standardized Description"] != "")]
+            df[self.functional_column] = df[self.functional_column].str.replace(r"\.0+$", "", regex=True)
+            df = df[(df[self.functional_column] != "") & (df[self.description_column] != "")]
 
             if df.empty:
                 logger.warning(f"Sheet '{sheet_name}' has no valid hierarchy rows. Skipping.")
@@ -66,15 +75,15 @@ class ExcelManager:
         combined = pd.concat(frames, ignore_index=True)
         logger.debug(f"Combined cleaned DataFrame has {len(combined)} rows.")
 
-        duplicated = combined.duplicated(subset="Functional Loc.", keep=False)
+        duplicated = combined.duplicated(subset=self.functional_column, keep=False)
         if duplicated.any():
-            dup_values = sorted(combined.loc[duplicated, "Functional Loc."].unique())
+            dup_values = sorted(combined.loc[duplicated, self.functional_column].unique())
             raise ValueError(
-                "Duplicate Functional Loc. values detected. Each Functional Loc. must be unique. "
+                f"Duplicate {self.functional_column} values detected. Each value must be unique. "
                 f"Duplicates: {', '.join(dup_values)}"
             )
 
-        logger.debug("No duplicate Functional Loc. values detected.")
+        logger.debug(f"No duplicate {self.functional_column} values detected.")
         self._dataframe = combined
         return combined.copy()
 
@@ -97,8 +106,10 @@ class ExcelManager:
 
     def create_dict(self):
         df = self.load_records()
-        excel_dict = dict(zip(df["Functional Loc."], df["Standardized Description"]))
-        logger.debug(f"Excel provided {len(excel_dict)} unique Functional Loc. entries before injecting root.")
+        excel_dict = dict(zip(df[self.functional_column], df[self.description_column]))
+        logger.debug(
+            f"Excel provided {len(excel_dict)} unique {self.functional_column} entries before injecting root."
+        )
 
         # Enforce canonical root definition regardless of Excel contents
         excel_dict.pop(ROOT_KEY, None)
